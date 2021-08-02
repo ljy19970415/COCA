@@ -58,20 +58,20 @@ class Cluster():
         return list(set(first)), list(set(second))
 
     def firstCluster(self, path):
-        time_start=time.time()
-        first = KMeans(n_clusters=self.l, random_state=0).fit(self.feature)
-        time_end=time.time()
-        print('clustering cost ',(time_end-time_start)//60,' min')
-        #joblib.dump(filename='inception_cluster.model',value=first)
-        #first=joblib.load('inception_cluster.model')
-        centers = first.cluster_centers_
-        confidence=[]
-        time_start=time.time()
-        for i in self.feature:
-            confidence.append(self.softmax([self.distEclud(i,j) for j in centers]))
-        time_end=time.time()
-        np.save(dataset+net+'_cluster_confidence.npy', confidence)
-        print('confidence cost ',(time_end-time_start)//60,' min')
+#         time_start=time.time()
+#         first = KMeans(n_clusters=self.l, random_state=0).fit(self.feature)
+#         time_end=time.time()
+#         print('clustering cost ',(time_end-time_start)//60,' min')
+#         #joblib.dump(filename='inception_cluster.model',value=first)
+#         #first=joblib.load('inception_cluster.model')
+#         centers = first.cluster_centers_
+#         confidence=[]
+#         time_start=time.time()
+#         for i in self.feature:
+#             confidence.append(self.softmax([self.distEclud(i,j) for j in centers]))
+#         time_end=time.time()
+#         np.save(dataset+net+'_cluster_confidence.npy', confidence)
+#         print('confidence cost ',(time_end-time_start)//60,' min')
         self.confidence = np.load(path+'_cluster_confidence.npy')
         self.n = len(self.confidence)
         return self.calCenter()
