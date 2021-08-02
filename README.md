@@ -28,5 +28,4 @@ batch_number, precision, cost, expert-annotated number, amateur-annotated number
 If the execution is interrupted in the middle. Set the isContinue parameter to be 1, the code will load the information in middle_point directory and continue the execution from the break point.
 
 ## CUB and Stanford Dogs
-Thoses directories store the results of the feature extraction and the first clustering. Due to the limitation of file size in github, the feature extraction results can't be uploaded.
-You can reach me by misslei@mail.ustc.edu.cn to ask for the feature file.
+Thoses directories store the results of the feature extraction and the first clustering. Due to the limitation of file size in github, the feature extraction results can't be uploaded. But it won't affect the execution. You can reach me by misslei@mail.ustc.edu.cn to ask for the feature file if you are interested.
