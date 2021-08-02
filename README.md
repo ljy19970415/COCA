@@ -9,14 +9,14 @@ dataset can be either 'CUB' or 'Stanford Dogs'
 net can be 'resnet50', 'vgg16' or 'mobilenet'
 p is the accuracy of amateurs, 1.0 means no noise, 0.9 means accuracy is 90%
 
-##annotate.py
+## annotate.py
 annotate.py includes the annotation process of amateurs and experts.
 It has the firstBatch funtion which is the first annotation batch process and restBatch function for the rest annotation batches.
 
 ## cluster.py
 cluster.py includes the feature extraction, clustering process at the beginning of the annotation process. And it also generates confidence, updates the metric and produces amateur and expert rankings in the rest batches.
 
-##lmnn.py
+## lmnn.py
 lmnn.py implements the LMNN metric learning models.
 
 ## **_records/&&
