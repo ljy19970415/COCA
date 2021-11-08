@@ -8,7 +8,7 @@ import csv
 import os
 import argparse
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def append_csv(path,datas):
     with open(path, "a", newline='') as file: # 处理csv读写时不同换行符  linux:\n    windows:\r\n    mac:\r
@@ -24,17 +24,20 @@ def generateTrain(annotate, subtitle, rootpath):
     if not os.path.exists(rootpath + subtitle):
         os.mkdir(rootpath + subtitle)
     np.save(rootpath+subtitle+'/reallabel.npy', annotate.reallabel)
+    np.save(rootpath+subtitle+'/reallabelDic.npy',annotate.reallabelDic)
     np.save(rootpath+subtitle+'/halflabel.npy', annotate.halflabel)
     np.save(rootpath+subtitle+'/unlabel.npy', annotate.unlabel)
     np.save(rootpath+subtitle+'/info.npy', [annotate.B-annotate.left, annotate.e_num, annotate.a_num, annotate.a_correct])
     np.save(rootpath+subtitle+'/discoveredClass.npy',annotate.discoveredClass)
+    temp=[np.argmax(i) if len(i)>0 else -1 for i in annotate.myCluster.confidence]
+    np.save(rootpath+subtitle+'/pseudolabel.npy',temp)
 
-def COCA(dataset, e, a, isEqual, isContinue, eSelect, aNum, aSelect, net):
+def COCA(dataset, e, a, isContinue, eSelect, aSelect, net):
     # mode 为使用的utility计算方法
-    if p<1:
-        rootpath=dataset[:-1]+'_records_noise/'+net+'_'+str(eSelect)+'/'
+    if p1<1 or p2<1:
+        rootpath='Datasets/'+dataset[:-1]+'_records_noise/'+net+'_'+str(eSelect)+'/'
     else:
-        rootpath=dataset[:-1]+'_records/'+net+'_'+str(eSelect)+'/'
+        rootpath='Datasets/'+dataset[:-1]+'_records/'+net+'_'+str(eSelect)+'/'
     print(rootpath)
      
     annotate = Annotate(dataset, e, a, rootpath, net) 
@@ -43,7 +46,7 @@ def COCA(dataset, e, a, isEqual, isContinue, eSelect, aNum, aSelect, net):
     time_start = time.time()
     if isContinue:
         k=np.load(rootpath+'middle_point/k.npy')[0]+1
-        flag=annotate.annotate(k, True, eSelect, aNum, aSelect, net)
+        flag=annotate.annotate(k, True, eSelect, aSelect, net)
         precision, cost, class_num, e_num, a_num, a_correct, min_num, max_num, std=annotate.calBatchPrecision()
         print("batch: "+str(k)+"; precision: "+str(precision)+"; cost: "+str(cost)+"; class_num: "+str(class_num)+"; min: "+str(min_num)+"; max: "+str(max_num)+"; std: "+str(std))
         print("e_num: "+str(e_num)+"; a_num: "+str(a_num)+"; a_correct: "+str(a_correct)+"; total_correct: "+str(a_correct+e_num))
@@ -51,7 +54,7 @@ def COCA(dataset, e, a, isEqual, isContinue, eSelect, aNum, aSelect, net):
         append_txt(rootpath+'result.txt',",".join([str(k), str(precision), str(cost), str(e_num), str(a_num), str(a_correct), str(a_correct+e_num), str(std), str(class_num)]))
         k+=1
     while flag:
-        flag=annotate.annotate(k, False, eSelect, aNum, aSelect, net)
+        flag=annotate.annotate(k, False, eSelect, aSelect, net)
         precision, cost, class_num, e_num, a_num, a_correct, min_num, max_num, std=annotate.calBatchPrecision()
         print("batch: "+str(k)+"; precision: "+str(precision)+"; cost: "+str(cost)+"; class_num: "+str(class_num)+"; min: "+str(min_num)+"; max: "+str(max_num)+"; std: "+str(std))
         print("e_num: "+str(e_num)+"; a_num: "+str(a_num)+"; a_correct: "+str(a_correct)+"; total_correct: "+str(a_correct+e_num))
@@ -67,10 +70,8 @@ if __name__ == '__main__':
     parser.add_argument('--l',type=int, default=50)
     parser.add_argument('--e', type=int, default=10)
     parser.add_argument('--a', type=int, default=1)
-    parser.add_argument('--isEqual', type=int, default=1)
     parser.add_argument('--isContinue', type=int, default=0)
     parser.add_argument('--eSelect', type=int, default=4)
-    parser.add_argument('--aNum', type=int, default=1)
     parser.add_argument('--aSelect', type=int, default=1)
     parser.add_argument('--net', type=str, default='resnet50')
     parser.add_argument('--dataset', type=str, default="Stanford Dogs")
@@ -81,4 +82,4 @@ if __name__ == '__main__':
     # dataset can be either 'CUB' or 'Stanford Dogs'
     # net can be 'resnet50', 'vgg16' or 'mobilenet'
     # isContinue means start from the middle point
-    COCA(args.dataset+'/', args.e, args.a, args.isEqual, args.isContinue, args.eSelect, args.aNum, args.aSelect, args.net)
+    COCA(args.dataset+'/', args.e, args.a, args.isContinue, args.eSelect, args.aSelect, args.net)
