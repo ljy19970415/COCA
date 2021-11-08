@@ -29,7 +29,7 @@ def generateTrain(annotate, subtitle, rootpath):
     np.save(rootpath+subtitle+'/info.npy', [annotate.B-annotate.left, annotate.e_num, annotate.a_num, annotate.a_correct])
     np.save(rootpath+subtitle+'/discoveredClass.npy',annotate.discoveredClass)
 
-def COCA(dataset, e, a, isEqual, isContinue, eSelect, aNum, aSelect, net, p):
+def COCA(dataset, e, a, isEqual, isContinue, eSelect, aNum, aSelect, net):
     # mode 为使用的utility计算方法
     if p<1:
         rootpath=dataset[:-1]+'_records_noise/'+net+'_'+str(eSelect)+'/'
@@ -43,7 +43,7 @@ def COCA(dataset, e, a, isEqual, isContinue, eSelect, aNum, aSelect, net, p):
     time_start = time.time()
     if isContinue:
         k=np.load(rootpath+'middle_point/k.npy')[0]+1
-        flag=annotate.annotate(k, True, eSelect, aNum, aSelect, net, p)
+        flag=annotate.annotate(k, True, eSelect, aNum, aSelect, net)
         precision, cost, class_num, e_num, a_num, a_correct, min_num, max_num, std=annotate.calBatchPrecision()
         print("batch: "+str(k)+"; precision: "+str(precision)+"; cost: "+str(cost)+"; class_num: "+str(class_num)+"; min: "+str(min_num)+"; max: "+str(max_num)+"; std: "+str(std))
         print("e_num: "+str(e_num)+"; a_num: "+str(a_num)+"; a_correct: "+str(a_correct)+"; total_correct: "+str(a_correct+e_num))
@@ -51,7 +51,7 @@ def COCA(dataset, e, a, isEqual, isContinue, eSelect, aNum, aSelect, net, p):
         append_txt(rootpath+'result.txt',",".join([str(k), str(precision), str(cost), str(e_num), str(a_num), str(a_correct), str(a_correct+e_num), str(std), str(class_num)]))
         k+=1
     while flag:
-        flag=annotate.annotate(k, False, eSelect, aNum, aSelect, net, p)
+        flag=annotate.annotate(k, False, eSelect, aNum, aSelect, net)
         precision, cost, class_num, e_num, a_num, a_correct, min_num, max_num, std=annotate.calBatchPrecision()
         print("batch: "+str(k)+"; precision: "+str(precision)+"; cost: "+str(cost)+"; class_num: "+str(class_num)+"; min: "+str(min_num)+"; max: "+str(max_num)+"; std: "+str(std))
         print("e_num: "+str(e_num)+"; a_num: "+str(a_num)+"; a_correct: "+str(a_correct)+"; total_correct: "+str(a_correct+e_num))
@@ -73,13 +73,12 @@ if __name__ == '__main__':
     parser.add_argument('--aNum', type=int, default=1)
     parser.add_argument('--aSelect', type=int, default=1)
     parser.add_argument('--net', type=str, default='resnet50')
-    parser.add_argument('--p', type=float, default=1.0)
     parser.add_argument('--dataset', type=str, default="Stanford Dogs")
 
     args = parser.parse_args()
 
-    # you only have to adjust parameter: dataset, net, p
+    # you only have to adjust parameter: dataset, net, isContinue
     # dataset can be either 'CUB' or 'Stanford Dogs'
     # net can be 'resnet50', 'vgg16' or 'mobilenet'
-    # p is the accuracy of amateurs, 1.0 means no noise, 0.9 means accuracy is 90%
-    COCA(args.dataset+'/', args.e, args.a, args.isEqual, args.isContinue, args.eSelect, args.aNum, args.aSelect, args.net, args.p)
+    # isContinue means start from the middle point
+    COCA(args.dataset+'/', args.e, args.a, args.isEqual, args.isContinue, args.eSelect, args.aNum, args.aSelect, args.net)
